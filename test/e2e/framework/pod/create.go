@@ -57,6 +57,7 @@ type Config struct {
 // CreateUnschedulablePod with given claims based on node selector
 func CreateUnschedulablePod(ctx context.Context, client clientset.Interface, namespace string, nodeSelector map[string]string, pvclaims []*v1.PersistentVolumeClaim, securityLevel admissionapi.Level, command string) (*v1.Pod, error) {
 	pod := MakePod(namespace, nodeSelector, pvclaims, securityLevel, command)
+	injectGlobalPodFields(pod)
 	pod, err := client.CoreV1().Pods(namespace).Create(ctx, pod, metav1.CreateOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("pod Create API error: %w", err)
@@ -82,6 +83,7 @@ func CreateClientPod(ctx context.Context, c clientset.Interface, ns string, pvc 
 // CreatePod with given claims based on node selector
 func CreatePod(ctx context.Context, client clientset.Interface, namespace string, nodeSelector map[string]string, pvclaims []*v1.PersistentVolumeClaim, securityLevel admissionapi.Level, command string) (*v1.Pod, error) {
 	pod := MakePod(namespace, nodeSelector, pvclaims, securityLevel, command)
+	injectGlobalPodFields(pod)
 	pod, err := client.CoreV1().Pods(namespace).Create(ctx, pod, metav1.CreateOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("pod Create API error: %w", err)
@@ -110,6 +112,7 @@ func CreateSecPodWithNodeSelection(ctx context.Context, client clientset.Interfa
 	if err != nil {
 		return nil, fmt.Errorf("Unable to create pod: %w", err)
 	}
+	injectGlobalPodFields(pod)
 
 	pod, err = client.CoreV1().Pods(podConfig.NS).Create(ctx, pod, metav1.CreateOptions{})
 	if err != nil {

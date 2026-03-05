@@ -239,6 +239,18 @@ func (c *PodClient) DeleteSync(ctx context.Context, name string, options metav1.
 	framework.ExpectNoError(WaitForPodNotFoundInNamespace(ctx, c.f.ClientSet, name, c.namespace, timeout), "wait for pod %q to disappear", name)
 }
 
+// injectGlobalPodFields applies framework-wide pod field overrides configured via CLI flags
+// (--runtime-class-name, --pod-node-name). Called from both mungeSpec (PodClient path) and
+// the direct-API helper functions in create.go / resource.go.
+func injectGlobalPodFields(pod *v1.Pod) {
+	if rc := framework.TestContext.RuntimeClassName; rc != "" {
+		pod.Spec.RuntimeClassName = &rc
+	}
+	if nn := framework.TestContext.PodNodeName; nn != "" {
+		pod.Spec.NodeName = nn
+	}
+}
+
 // addTestOrigin adds annotations to help identifying tests which incorrectly leak pods because insufficient cleanup
 func (c *PodClient) setOwnerAnnotation(pod *v1.Pod) {
 	if !c.ownerTracking {
@@ -254,6 +266,9 @@ func (c *PodClient) setOwnerAnnotation(pod *v1.Pod) {
 
 // mungeSpec apply test-suite specific transformations to the pod spec.
 func (c *PodClient) mungeSpec(pod *v1.Pod) {
+	// Inject global runtimeClassName and nodeName if configured.
+	injectGlobalPodFields(pod)
+
 	if !framework.TestContext.NodeE2E {
 		return
 	}

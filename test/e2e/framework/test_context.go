@@ -203,6 +203,14 @@ type TestContextType struct {
 	// DockerConfigFile is a file that contains credentials which can be used to pull images from certain private registries, needed for a test.
 	DockerConfigFile string
 
+	// RuntimeClassName is an optional runtimeClassName to set on every pod created by the e2e framework.
+	// When non-empty it is injected into pod.Spec.RuntimeClassName for all pods.
+	RuntimeClassName string
+
+	// PodNodeName is an optional node name to pin every pod to (cluster e2e mode).
+	// When non-empty it is injected into pod.Spec.NodeName for all pods.
+	PodNodeName string
+
 	// E2EDockerConfigFile is a docker credentials configuration file used which contains authorization token that can be used to pull images from certain private registries provided by the users.
 	// For more details refer https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#log-in-to-docker-hub
 	E2EDockerConfigFile string
@@ -400,6 +408,8 @@ func RegisterClusterFlags(flags *flag.FlagSet) {
 	flags.StringVar(&TestContext.NodeOSDistro, "node-os-distro", "debian", "The OS distribution of cluster VM instances (debian, ubuntu, gci, coreos, windows, or custom), which determines how specific tests are implemented.")
 	flags.StringVar(&TestContext.NodeOSArch, "node-os-arch", "amd64", "The OS architecture of cluster VM instances (amd64, arm64, or custom).")
 	flags.StringVar(&TestContext.ClusterDNSDomain, "dns-domain", "cluster.local", "The DNS Domain of the cluster.")
+	flags.StringVar(&TestContext.RuntimeClassName, "runtime-class-name", "", "If non-empty, set this runtimeClassName on every pod created by the e2e framework.")
+	flags.StringVar(&TestContext.PodNodeName, "pod-node-name", "", "If non-empty, pin every pod created by the e2e framework to this node name.")
 
 	// TODO: Flags per provider?  Rename gce-project/gce-zone?
 	cloudConfig := &TestContext.CloudConfig

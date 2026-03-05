@@ -343,6 +343,7 @@ func newExecPodSpec(ns, generateName string) *v1.Pod {
 func CreateExecPodOrFail(ctx context.Context, client clientset.Interface, ns, generateName string, tweak func(*v1.Pod)) *v1.Pod {
 	framework.Logf("Creating new exec pod")
 	pod := newExecPodSpec(ns, generateName)
+	injectGlobalPodFields(pod)
 	if tweak != nil {
 		tweak(pod)
 	}
